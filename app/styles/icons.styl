@@ -1,0 +1,11 @@
+// Define the icon codes.
+$icons = {
+  battery: '\f242',
+  volume:  '\f028',
+  wifi:    '\f1eb'
+}
+
+// Add this mixin to show an icon.
+icon($icon)
+  font-family FontAwesome
+  content $icons[$icon]

@@ -1,0 +1,44 @@
+// The default title font.
+@font-face
+  font-family Dosis
+  src url(dosis-light.ttf)
+
+// The default bold title font.
+@font-face
+  font-family Dosis
+  font-weight bold
+  src url(dosis-medium.ttf)
+
+// The default body font.
+@font-face
+  font-family Raleway
+  src url(raleway-light.ttf)
+
+// Styles for titles of things.
+title-text($size = 1.1em)
+  font-family Dosis
+  font-weight bold
+  font-size $size
+  color $text
+  @media (min-width $small)
+    font-size $size + .4em
+  @media (min-width $large)
+    font-size $size + .8em
+
+// Styles for subtitles of things.
+subtitle-text($size = .8em)
+  font-family Dosis
+  font-size $size
+  color $light-text
+  @media (min-width $small)
+    font-size $size + .2em
+  @media (min-width $large)
+    font-size $size + .4em
+
+// Styles for most normal uses.
+paragraph-text()
+  font-family Raleway
+  @media (min-width $small)
+    font-size 1.1em
+  @media (min-width $large)
+    font-size 1.3em

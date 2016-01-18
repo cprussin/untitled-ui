@@ -3,12 +3,10 @@
   "description": "ui",
   "version": "0.1",
   "manifest_version": 2,
-  "app": {
-    "background": {
-      "scripts": ["launcher.js"]
-    }
-  },
+  "app": {"background": {"scripts": ["launcher.js"]}},
   "permissions": [
-    "webview"
+    "audio",
+    "webview",
+    {"fileSystem": ["write", "retainEntries", "directory"]}
   ]
 }
