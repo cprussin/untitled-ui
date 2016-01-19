@@ -4,16 +4,7 @@
   flex-flow column nowrap
   align-items center
   justify-content center
-
-.overlay
-  background black
-  opacity .75
-  position absolute
-  top 0
-  bottom 0
-  left 0
-  right 0
-  z-index -1
+  background rgba(0, 0, 0, .75)
 
 .background, .background > .liquid-child, .background > .liquid-child > img
   position absolute
@@ -45,8 +36,13 @@
     &:before
       margin-right 5px
 
-  .volume:before
-    icon 'volume'
+  .volume
+    &.mute
+      color gray
+      &:before
+        icon 'mute'
+    &:not(.mute):before
+      icon 'volume'
 
   .network:before
     icon 'wifi'

@@ -1,0 +1,20 @@
+{
+  "name": "sysinfo",
+  "version": "0.0.1",
+  "author": "Connor Prussin <connor@prussin.net>",
+  "description": "A server for serving system information.",
+  "license": "MIT",
+  "repository": "http://connor.prussin.net/sysinfo.git",
+  "engines": {
+    "node": ">=0.10"
+  },
+  "scripts": {
+    "serve": "forever -w -a ./sysinfo.js",
+    "start": "forever start -w -a ./sysinfo.js",
+    "stop": "forever stop ./realtime.js"
+  },
+  "dependencies": {
+    "forever": "^0.15.1",
+    "nodejs-websocket": "^1.5.0"
+  }
+}

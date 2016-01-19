@@ -1,5 +1,7 @@
 import E from 'ember';
+
 export default E.Component.extend({
+  audio: E.inject.service(),
   days: 'Monday Tuesday Wednesday Thursday Friday Saturday Sunday'.w(),
   months: "January February Mark April May June July August September October\
            November December".w(),

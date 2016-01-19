@@ -1,1 +1,1 @@
-%webview src=url
+if url: %webview src=webviewUrl

@@ -2,10 +2,11 @@
 
 module.exports = function(environment) {
   var ENV = {
+    APP: {},
+    EmberENV: {FEATURES: {}},
     modulePrefix: 'ui',
     environment: environment,
-    EmberENV: {FEATURES: {}},
-    APP: {}
+    sysinfo: 'ws://localhost:6969'
   };
 
   if (environment === 'test') {
