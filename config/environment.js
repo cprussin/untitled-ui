@@ -6,7 +6,7 @@ module.exports = function(environment) {
     EmberENV: {FEATURES: {}},
     modulePrefix: 'ui',
     environment: environment,
-    sysinfo: 'ws://localhost:6969'
+    sysinfo: {host: 'localhost', port: 6969}
   };
 
   if (environment === 'test') {

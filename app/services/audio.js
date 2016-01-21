@@ -5,7 +5,7 @@ export default E.Service.extend({
 
   getVolume: E.on('init', function() {
     this.get('socket').register('volume', (message) => {
-      this.setProperties({volume: message[0], mute: message[1] === 'mute'});
+      this.setProperties(message);
     });
     this.get('socket').send('get volume');
   }),

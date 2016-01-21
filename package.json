@@ -10,7 +10,10 @@
   "scripts": {
     "build": "ember build",
     "start": "ember server",
-    "test": "ember test"
+    "test": "ember test",
+    "sysinfo_serve": "forever -w -a ./sysinfo.js",
+    "sysinfo_start": "forever start -w -a ./sysinfo.js",
+    "sysinfo_stop": "forever stop ./sysinfo.js"
   },
   "repository": "http://connor.prussin.net/ui.git",
   "engines": {
@@ -42,6 +45,8 @@
     "ember-disable-proxy-controllers": "^1.0.1",
     "ember-export-application-global": "^1.0.4",
     "ember-keyboard-shortcuts": "0.3.0",
-    "liquid-fire": "0.22.1"
+    "forever": "^0.15.1",
+    "liquid-fire": "0.22.1",
+    "nodejs-websocket": "^1.5.0"
   }
 }
