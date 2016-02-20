@@ -6,7 +6,11 @@ module.exports = function(environment) {
     EmberENV: {FEATURES: {}},
     modulePrefix: 'ui',
     environment: environment,
-    sysinfo: {host: 'localhost', port: 6969}
+    sysinfo: {
+      host: 'localhost',
+      websocket: 6969,
+      socket: '/run/user/1000/ui'
+    }
   };
 
   if (environment === 'test') {

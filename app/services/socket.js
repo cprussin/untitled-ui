@@ -5,7 +5,7 @@ export default E.Service.extend({
   messages: {},
 
   setup: E.on('init', function() {
-    let url    = `ws://${config.sysinfo.host}:${config.sysinfo.port}`,
+    let url    = `ws://${config.sysinfo.host}:${config.sysinfo.websocket}`,
         socket = new WebSocket(url);
     socket.onmessage = (event) => {
       let json = JSON.parse(event.data), fn = this.messages[json.message];

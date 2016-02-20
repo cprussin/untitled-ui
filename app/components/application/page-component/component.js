@@ -4,8 +4,32 @@ import Liquid from 'ui/mixins/liquid';
 
 export default E.Component.extend(KeyboardShortcuts, Liquid, {
   audio: E.inject.service(),
-  launching: true,
+  windowManager: E.inject.service(),
   initialUrl: E.computed.oneWay('url'),
+  launching: true,
+  newWindow: false,
+
+  setupTransitions: E.observer('liquid', function() {
+    let liquid = this.get('liquid');
+    'launcher status'.w().forEach((className) => {
+      liquid.transition(
+        liquid.hasClass(className),
+        liquid.toValue(true),
+        liquid.use('toDown'),
+        liquid.reverse('toUp')
+      );
+    });
+    liquid.transition(
+      liquid.hasClass('volume-overlay'),
+      liquid.use('fade')
+    );
+  }).on('init'),
+
+  volumeOverlayClasses: E.computed('audio.mute', function() {
+    var classes = ['volume-overlay'];
+    if (this.get('audio.mute')) {classes.push('mute');}
+    return classes.join(' ');
+  }),
 
   hideVolume() {
     this.set('volumeVisible', false);
@@ -16,54 +40,72 @@ export default E.Component.extend(KeyboardShortcuts, Liquid, {
     E.run.debounce(this, this.hideVolume, 1000);
   },
 
-  volumeOverlayClasses: E.computed('audio.mute', function() {
-    var classes = ['volume-overlay'];
-    if (this.get('audio.mute')) {classes.push('mute');}
-    return classes.join(' ');
-  }),
+  close() {
+    if (this.get('newWindow')) {
+      this.setProperties({newWindow: false, launching: false});
+    } else {
+      this.get('windowManager').close();
+      this.set('launching', this.get('windowManager.isEmpty'));
+    }
+  },
 
-  setupTransitions: E.observer('liquid', function() {
-    let liquid = this.get('liquid');
-    liquid.transition(
-      liquid.hasClass('launcher'),
-      liquid.toValue(true),
-      liquid.use('toDown'),
-      liquid.reverse('toUp')
-    );
-  }).on('init'),
+  go(str) {
+    this.get('windowManager').launch(this.get('newWindow'), str);
+    this.setProperties({launching: false, newWindow: false});
+  },
 
   actions: {
-    closeLauncher: function() {
-      if (E.isEmpty(this.get('url'))) {return;}
-      this.setProperties({launching: false});
+    go: function(str) {
+      if (E.isEmpty(str)) {
+        this.close();
+      } else {
+        this.go(str);
+      }
     }
   },
 
   keyboardShortcuts: {
     'meta+end': function() {
       this.get('audio').toggle();
-      if (!this.get('launching')) {this.showVolume();}
+      this.showVolume();
     },
 
     'meta+pageup': function() {
       this.get('audio').increase();
-      if (!this.get('launching')) {this.showVolume();}
+      this.showVolume();
     },
 
     'meta+pagedown': function() {
       this.get('audio').decrease();
-      if (!this.get('launching')) {this.showVolume();}
+      this.showVolume();
+    },
+
+    'shift+esc': function() {
+      this.set('newWindow', true);
+      this.get('keyboardShortcuts.esc').call(this);
     },
 
     esc: function() {
-      if (E.isEmpty(this.get('url'))) {return;}
+      if (this.get('windowManager.isEmpty')) {return;}
       this.toggleProperty('launching');
       if (this.get('launching')) {
+        let url = this.get('windowManager.selected.url');
         this.setProperties({
-          volumeVisible: false,
-          initialUrl: this.get('url')
+          initialUrl: this.get('newWindow') ? '' : url,
+          showStatus: false
         });
+      } else {
+        this.set('newWindow', false);
       }
+    },
+
+    'meta+ins': function() {
+      if (this.get('launching')) {return;}
+      this.toggleProperty('showStatus');
+    },
+
+    'shift+space': function() {
+      this.get('windowManager').toggleView();
     }
   }
 });

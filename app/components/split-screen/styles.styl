@@ -1,0 +1,45 @@
+&
+  position auto
+  display flex
+  flex-wrap nowrap
+
+&.horizontal
+  flex-direction row
+
+&.vertical
+  flex-direction column
+
+&.tabbed
+  flex-direction column
+  & > .window
+    border-width 0
+    &:not(.selected)
+      display none
+
+& > .tabs
+  display flex
+  flex-flow row nowrap
+  background $background
+  color $foreground
+  .tab
+    flex-grow 1
+    flex-basis 0
+    padding 5px
+    text-overflow ellipsis
+    overflow hidden
+    white-space nowrap
+    transition border-color $speed, background $speed, color $speed
+    &:not(:first-child)
+      border-left $border-size solid $foreground
+    &.selected
+      border-color $foreground
+      background $foreground
+      color $background
+
+& > .window
+  position relative
+  flex-basis 0
+  flex-grow 1
+  border $border-size solid $background
+  &.selected
+    border-color $foreground

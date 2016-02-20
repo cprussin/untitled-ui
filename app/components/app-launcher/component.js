@@ -1,7 +1,6 @@
 import E from 'ember';
 
 export default E.Component.extend({
-  audio: E.inject.service(),
   days: 'Monday Tuesday Wednesday Thursday Friday Saturday Sunday'.w(),
   months: "January February Mark April May June July August September October\
            November December".w(),
@@ -13,10 +12,6 @@ export default E.Component.extend({
   selectInputOnShow: E.on('didInsertElement', function() {
     let method = E.isEmpty(this.get('value')) ? 'focus' : 'select';
     this.$('input')[method]();
-  }),
-
-  setShowBackground: E.on('init', function() {
-    this.set('showBackground', E.isEmpty(this.get('value')));
   }),
 
   setDate: E.on('init', function() {
@@ -34,17 +29,10 @@ export default E.Component.extend({
     E.run.later(this, this.setTime, 86400000 - millis);
   }),
 
-
   actions: {
 
-    handleEnter() {
-      this.set('showBackground', E.isEmpty(this.get('value')));
-      if (this.attrs['update'] !== undefined) {
-        this.attrs['update'](this.get('value'));
-      }
-      if (this.attrs['enter'] !== undefined) {
-        this.attrs['enter']();
-      }
+    enter() {
+      this.attrs['enter'](this.get('value'));
     }
   }
 });

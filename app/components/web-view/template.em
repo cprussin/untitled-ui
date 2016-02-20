@@ -1,0 +1,1 @@
+%webview src=window.url
