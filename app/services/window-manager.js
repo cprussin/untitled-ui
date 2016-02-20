@@ -21,7 +21,8 @@ export default E.Service.extend({
         url: `http://${str}`,
         parent: this.get('windows')
       });
-      this.get('windows.children').pushObject(win);
+      let index = this.get('windows.children').indexOf(this.get('selected'));
+      this.get('windows.children').insertAt(index + 1, win);
       this.select(win);
     } else {
       this.get('selected').set('url', `http://${str}`);
@@ -29,8 +30,9 @@ export default E.Service.extend({
   },
 
   close() {
+    let index = this.get('windows.children').indexOf(this.get('selected'));
     this.get('windows.children').removeObject(this.get('selected'));
-    this.select(this.get('windows.children.lastObject'));
+    this.select(this.get('windows.children').objectAt(index));
   },
 
   toggleView() {
