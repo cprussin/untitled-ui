@@ -8,6 +8,7 @@ export default E.Component.extend(KeyboardShortcuts, Liquid, {
   initialUrl: E.computed.oneWay('url'),
   launching: true,
   newWindow: false,
+  newSplit: false,
 
   setupTransitions: E.observer('liquid', function() {
     let liquid = this.get('liquid');
@@ -47,11 +48,13 @@ export default E.Component.extend(KeyboardShortcuts, Liquid, {
       this.get('windowManager').close();
       this.set('launching', this.get('windowManager.isEmpty'));
     }
+    this.set('newSplit', false);
   },
 
   go(str) {
-    this.get('windowManager').launch(this.get('newWindow'), str);
-    this.setProperties({launching: false, newWindow: false});
+    let newWindow = this.get('newWindow'), newSplit = this.get('newSplit');
+    this.get('windowManager').launch(newWindow, newSplit, str);
+    this.setProperties({launching: false, newWindow: false, newSplit: false});
   },
 
   actions: {
@@ -85,6 +88,11 @@ export default E.Component.extend(KeyboardShortcuts, Liquid, {
       this.get('keyboardShortcuts.esc').call(this);
     },
 
+    'esc+tab': function() {
+      this.setProperties({newWindow: true, newSplit: true});
+      this.get('keyboardShortcuts.esc').call(this);
+    },
+
     esc: function() {
       if (this.get('windowManager.isEmpty')) {return;}
       this.toggleProperty('launching');
@@ -95,7 +103,7 @@ export default E.Component.extend(KeyboardShortcuts, Liquid, {
           showStatus: false
         });
       } else {
-        this.set('newWindow', false);
+        this.setProperties({newWindow: false, newSplit: false});
       }
     },
 

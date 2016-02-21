@@ -1,36 +1,81 @@
 import E from 'ember';
 
-export default E.Service.extend({
-  Browser: E.Object.extend({type: 'web-view', title: E.computed.alias('url')}),
+var Browser = E.Object.extend({type: 'web-view'});
 
-  windows: E.Object.create({direction: 'tabbed', children: []}),
+var Split = E.Object.extend({
+  type: 'split-screen',
+  title: 'Split',
+  children: [],
+  direction: E.computed('parent.direction', function() {
+    return this.get('parent.direction') === 'tabbed' ? 'horizontal' : 'tabbed';
+  })
+});
+
+export default E.Service.extend({
+  windows: Split.create(),
   isEmpty: E.computed.empty('windows.children'),
   selected: null,
 
+  selectedIndex: E.computed('selected.parent.[]', 'selected', function() {
+    if (!this.get('selected.parent')) {return -1;}
+    return this.get('selected.parent.children').indexOf(this.get('selected'));
+  }),
+
+  toggleSelectState(win, selected) {
+    let cursor = win;
+    if (cursor) {cursor.set('selectedLeaf', selected);}
+    while (cursor) {
+      cursor.set('selected', selected);
+      cursor = cursor.get('parent');
+    }
+  },
+
   select(win) {
-    if (win === this.get('selected')) {return;}
-    if (win) {win.set('selected', true);}
-    let sel = this.get('selected');
-    if (sel !== null) {sel.set('selected', false);}
+    let selected = this.get('selected');
+    if (win === selected) {return;}
+    this.toggleSelectState(selected, false);
+    this.toggleSelectState(win, true);
     this.set('selected', win || null);
   },
 
-  launch(newWindow, str) {
+  createSplit() {
+    if (this.get('isEmpty')) {return;}
+    let children = this.get('selected.parent.children');
+    let index = this.get('selectedIndex');
+    children.removeObject(this.get('selected'));
+    let split = Split.create({
+      parent: this.get('selected.parent'),
+      children: [this.get('selected')]
+    });
+    children.insertAt(index, split);
+    this.get('selected').set('parent', split);
+  },
+
+  toUrl(str) {
+    return str.startsWith('http') ? str : `http://${str}`;
+  },
+
+  createWindow(str) {
+    let parent = this.get('selected.parent') || this.get('windows');
+    let win = Browser.create({url: this.toUrl(str), parent: parent});
+    parent.get('children').insertAt(this.get('selectedIndex') + 1, win);
+    this.select(win);
+  },
+
+  launch(newWindow, newSplit, str) {
     if (newWindow || this.get('selected') === null) {
-      let win = this.Browser.create({
-        url: `http://${str}`,
-        parent: this.get('windows')
-      });
-      let index = this.get('windows.children').indexOf(this.get('selected'));
-      this.get('windows.children').insertAt(index + 1, win);
-      this.select(win);
+      if (newSplit) {this.createSplit();}
+      this.createWindow(str);
     } else {
-      this.get('selected').set('url', `http://${str}`);
+      this.get('selected').set('url', this.toUrl(str));
     }
   },
 
   close() {
-    let index = this.get('windows.children').indexOf(this.get('selected'));
+    let index = this.get('selectedIndex');
+    if (this.get('windows.children.length') - 1 === this.get('selectedIndex')) {
+      index--;
+    }
     this.get('windows.children').removeObject(this.get('selected'));
     this.select(this.get('windows.children').objectAt(index));
   },

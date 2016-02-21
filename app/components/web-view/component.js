@@ -2,7 +2,14 @@ import E from 'ember';
 
 export default E.Component.extend({
   windowManager: E.inject.service(),
-  classNameBindings: 'window.selected:selected',
+  classNameBindings: 'side window.selectedLeaf'.w(),
+
+  side: E.computed('window.selected', function() {
+    if (!this.get('window.parent')) {return;}
+    if (this.get('window.selected')) {return 'selected';}
+    let index = this.get('window.parent.children').indexOf(this.get('window'));
+    return index < this.get('windowManager.selectedIndex') ? 'left' : 'right';
+  }),
 
   setupWebview: E.on('didInsertElement', function() {
     let webview = this.$('webview')[0];
