@@ -6,8 +6,10 @@ var Split = E.Object.extend({
   type: 'split-screen',
   title: 'Split',
   children: [],
-  direction: E.computed('parent.direction', function() {
-    return this.get('parent.direction') === 'tabbed' ? 'horizontal' : 'tabbed';
+  setDirection: E.on('init', function() {
+    if (this.get('direction')) {return;}
+    let tabbed = this.get('parent.direction') === 'tabbed';
+    this.set('direction', tabbed ? 'horizontal' : 'tabbed');
   })
 });
 

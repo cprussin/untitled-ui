@@ -19,9 +19,15 @@ export default E.Component.extend({
     return this.get('window.children').indexOf(window);
   },
 
+  windowsLeft: E.computed('window.children.@each.selected', function() {
+    let children = this.get('window.children');
+    let selected = children.filterBy('selected').get('firstObject');
+    let index = children.indexOf(selected);
+    return new E.Handlebars.SafeString(`left: -${index * 100}%`);
+  }),
+
   actions: {
     select(win) {
-      this.$('.windows').css({left: `-${this.indexOf(win) * 100}%`});
       this.get('windowManager').select(win);
     }
   }
