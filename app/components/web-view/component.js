@@ -13,9 +13,35 @@ export default E.Component.extend({
 
   setupWebview: E.on('didInsertElement', function() {
     let webview = this.$('webview')[0];
-    webview.addEventListener('loadstop', () => {
-      this.get('window').setProperties({url: webview.src});
+    let code = "window.addEventListener('message', function(e) {" +
+               "  if (e.data.command == 'getTitle') {" +
+               "    var message = {" +
+               "      title: document.title," +
+               `      id: '${this.get('elementId')}'` +
+               "    };" +
+               "    e.source.postMessage(message, e.origin);" +
+               "  }" +
+               "});";
+    webview.addEventListener('loadstart', () => {
+      this.get('window').set('title', 'Loading...');
     });
+    webview.addEventListener('loadstop', () => {
+      this.get('window').set('title', '');
+    });
+    webview.addEventListener('contentload', () => {
+      this.get('window').set('url', webview.src);
+      webview.executeScript({code: code});
+      webview.contentWindow.postMessage({command: 'getTitle'}, '*');
+    });
+    this.set('message', (e) => {
+      if (e.data.id !== this.get('elementId')) {return;}
+      this.get('window').set('title', e.data.title);
+    });
+    window.addEventListener('message', this.get('message'));
+  }),
+
+  teardownEvents: E.on('willDestroy', function() {
+    window.removeEventListener('message', this.get('message'));
   }),
 
   mouseMove() {
