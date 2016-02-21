@@ -45,6 +45,7 @@ export default E.Component.extend({
   }),
 
   mouseMove() {
+    if (this.get('window.parent.direction') === 'tabbed') {return;}
     this.get('windowManager').select(this.get('window'));
   }
 });
