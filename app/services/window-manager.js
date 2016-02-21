@@ -75,11 +75,19 @@ export default E.Service.extend({
 
   close() {
     let index = this.get('selectedIndex');
-    if (this.get('windows.children.length') - 1 === this.get('selectedIndex')) {
+    let split = this.get('selected.parent');
+    if (split.get('children.length') - 1 === this.get('selectedIndex')) {
       index--;
     }
-    this.get('windows.children').removeObject(this.get('selected'));
-    this.select(this.get('windows.children').objectAt(index));
+    split.get('children').removeObject(this.get('selected'));
+    let newSelected = split.get('children').objectAt(index);
+    if (split.get('children.length') === 1 && split.get('parent')) {
+      index = split.get('parent.children').indexOf(split);
+      split.get('parent.children').removeObject(split);
+      split.get('parent.children').insertAt(index, newSelected);
+      newSelected.set('parent', split.get('parent'));
+    }
+    this.select(newSelected);
   },
 
   toggleView() {
