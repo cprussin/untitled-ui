@@ -6,7 +6,7 @@ serve() {
 }
 
 show() {
-  /usr/bin/chromium --profile-directory=Default --app-id=bkpnlliomccfcpckkdkcicnfjmmpoomk &
+  /usr/bin/chromium --profile-directory=Default --app-id=aodpdhndbklbinfncfhcammdhfnjbmjo &
 }
 
 case $1 in
