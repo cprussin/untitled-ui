@@ -1,13 +1,12 @@
 import E from 'ember';
-import ReconnectingWebSocket from 'reconnecting-websocket';
+import ReconnectingWebSocket from 'npm:reconnecting-websocket';
 import config from 'ui/config/environment';
 
-let url = `ws://${config.sysinfo.host}:${config.sysinfo.websocket}`;
-
 export default E.Service.extend({
+
   callbacks: E.Object.create(),
   messages: [],
-  socket: new ReconnectingWebSocket(url),
+  socket: new ReconnectingWebSocket(`ws://${config.sysinfo.host}:${config.sysinfo.websocket}`),
 
   setupSocket: E.observer('socket', function() {
     this.get('socket').onopen = () => this.sendMessages();
