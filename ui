@@ -1,0 +1,16 @@
+#!/usr/bin/sh
+
+serve() {
+  cd /home/cprussin/Projects/ui/Sources
+  npm run-script sysinfo_serve
+}
+
+show() {
+  /usr/bin/chromium --profile-directory=Default --app-id=bkpnlliomccfcpckkdkcicnfjmmpoomk &
+}
+
+case $1 in
+  serve) serve ;;
+  show) show ;;
+  *) show && serve ;;
+esac
