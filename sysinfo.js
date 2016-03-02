@@ -112,6 +112,10 @@ let websocket = Ws.createServer((conn) => {
     conn.run('pamixer ' + (mute ? ['--mute'] : ['--unmute'])).then(conn.getVolume);
   };
 
+  // Send initial set of infos.
+  conn.getVolume();
+  conn.getNetworks();
+
   // Handle incoming messages.
 	conn.on('text', (str) => {
     console.log('Received (Web): ' + str);

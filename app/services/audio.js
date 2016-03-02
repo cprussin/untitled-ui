@@ -7,7 +7,6 @@ export default E.Service.extend({
     this.get('socket').register('volume', (message) => {
       this.setProperties(message);
     });
-    this.get('socket').send('get volume');
   }),
 
   toggle() {

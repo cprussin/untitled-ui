@@ -1,33 +1,40 @@
 import E from 'ember';
+import ReconnectingWebSocket from 'reconnecting-websocket';
 import config from 'ui/config/environment';
 
-export default E.Service.extend({
-  messages: {},
-  openCallbacks: [],
+let url = `ws://${config.sysinfo.host}:${config.sysinfo.websocket}`;
 
-  setup: E.on('init', function() {
-    let url    = `ws://${config.sysinfo.host}:${config.sysinfo.websocket}`,
-        socket = new WebSocket(url);
-    socket.onmessage = (event) => {
-      let json = JSON.parse(event.data), fn = this.messages[json.message];
-      if (typeof fn === 'function') { fn(json.body); }
-    };
-    socket.onopen = () => {
-      this.get('openCallbacks').forEach((callback) => callback());
-    };
-    this.set('socket', socket);
-  }),
+export default E.Service.extend({
+  callbacks: E.Object.create(),
+  messages: [],
+  socket: new ReconnectingWebSocket(url),
+
+  setupSocket: E.observer('socket', function() {
+    this.get('socket').onopen = () => this.sendMessages();
+    this.get('socket').onmessage = (e) => this.receive(JSON.parse(e.data));
+  }).on('init'),
+
+  sendMessages() {
+    this.get('messages').forEach((message) => this.send(message));
+  },
+
+  receive(message) {
+    let fn = this.get('callbacks').get(message.message);
+    if (typeof fn === 'function') {
+      fn(message.body);
+    }
+  },
 
   send(message) {
-    let _this = this, fn = function() {_this.get('socket').send(message);};
     if (this.get('socket').readyState === 1) {
-      fn();
+      this.get('socket').send(message);
     } else {
-      this.get('openCallbacks').pushObject(fn);
+      this.get('messages').pushObject(message);
     }
   },
 
   register(message, fn) {
-    this.messages[message] = fn;
+    this.get('callbacks').set(message, fn);
   }
+
 });

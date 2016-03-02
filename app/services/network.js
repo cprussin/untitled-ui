@@ -7,6 +7,5 @@ export default E.Service.extend({
     this.get('socket').register('networks', (message) => {
       this.setProperties(message);
     });
-    this.get('socket').send('get networks');
   }),
 });
