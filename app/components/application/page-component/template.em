@@ -5,4 +5,4 @@ liquid-if .launcher launching: app-launcher [
   showBackground=windowManager.isEmpty
   value=initialUrl
   enter=(action 'go') ]
-split-screen .split-screen window=windowManager.windows
+component .window-manager windowManager.root.type window=windowManager.root

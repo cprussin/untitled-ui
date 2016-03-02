@@ -1,1 +1,1 @@
-%webview src=window.url
+%webview src=window.uri

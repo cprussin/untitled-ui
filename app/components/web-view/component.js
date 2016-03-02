@@ -2,14 +2,7 @@ import E from 'ember';
 
 export default E.Component.extend({
   windowManager: E.inject.service(),
-  classNameBindings: 'side window.selectedLeaf'.w(),
-
-  side: E.computed('window.selected', function() {
-    if (!this.get('window.parent')) {return;}
-    if (this.get('window.selected')) {return 'selected';}
-    let index = this.get('window.parent.children').indexOf(this.get('window'));
-    return index < this.get('windowManager.selectedIndex') ? 'left' : 'right';
-  }),
+  classNameBindings: 'window.selected window.lastSelected'.w(),
 
   setupWebview: E.on('didInsertElement', function() {
     let webview = this.$('webview')[0];
@@ -29,9 +22,12 @@ export default E.Component.extend({
       this.get('window').set('title', '');
     });
     webview.addEventListener('contentload', () => {
-      this.get('window').set('url', webview.src);
+      this.get('window').set('uri', webview.src);
       webview.executeScript({code: code});
       webview.contentWindow.postMessage({command: 'getTitle'}, '*');
+    });
+    webview.addEventListener('newwindow', (event) => {
+      this.get('windowManager').launch(event.targetUrl, 'tabbed');
     });
     this.set('message', (e) => {
       if (e.data.id !== this.get('elementId')) {return;}
@@ -45,7 +41,7 @@ export default E.Component.extend({
   }),
 
   mouseMove() {
-    if (this.get('window.parent.direction') === 'tabbed') {return;}
+    if (this.get('window.parent.mode') === 'tabbed') {return;}
     this.get('windowManager').select(this.get('window'));
   }
 });

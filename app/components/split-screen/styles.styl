@@ -23,6 +23,15 @@
   flex-flow row nowrap
   background $background
   color $foreground
+  position relative
+  z-index 0
+  & > .selector
+    background $foreground
+    position absolute
+    top 0
+    bottom 0
+    z-index -1
+    transition left $speed, right ($speed / 1.5)
   & > .tab
     flex-grow 1
     flex-basis 0
@@ -30,12 +39,10 @@
     text-overflow ellipsis
     overflow hidden
     white-space nowrap
-    transition border-color $speed, background $speed, color $speed
+    transition color $speed
     &:not(:first-child)
       border-left $border-size solid $foreground
     &.selected
-      border-color $foreground
-      background $foreground
       color $background
     &:not(.selected)
       cursor pointer
@@ -48,5 +55,7 @@
     flex-basis 0
     flex-grow 1
     border $border-size solid $background
-    &.selected-leaf
+    &.last-selected
+      border-color darken($foreground, 50%)
+    &.selected
       border-color $foreground

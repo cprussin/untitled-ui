@@ -7,8 +7,6 @@ export default E.Component.extend(KeyboardShortcuts, Liquid, {
   windowManager: E.inject.service(),
   initialUrl: E.computed.oneWay('url'),
   launching: true,
-  newWindow: false,
-  newSplit: false,
 
   setupTransitions: E.observer('liquid', function() {
     let liquid = this.get('liquid');
@@ -41,28 +39,14 @@ export default E.Component.extend(KeyboardShortcuts, Liquid, {
     E.run.debounce(this, this.hideVolume, 1000);
   },
 
-  close() {
-    if (this.get('newWindow')) {
-      this.setProperties({newWindow: false, launching: false});
-    } else {
-      this.get('windowManager').close();
-      this.set('launching', this.get('windowManager.isEmpty'));
-    }
-    this.set('newSplit', false);
-  },
-
-  go(str) {
-    let newWindow = this.get('newWindow'), newSplit = this.get('newSplit');
-    this.get('windowManager').launch(newWindow, newSplit, str);
-    this.setProperties({launching: false, newWindow: false, newSplit: false});
-  },
-
   actions: {
-    go: function(str) {
-      if (E.isEmpty(str)) {
-        this.close();
+    go: function(str, mode) {
+      if (str === 'http://') {
+        this.get('windowManager.selected').close();
+        this.set('launching', this.get('windowManager.isEmpty'));
       } else {
-        this.go(str);
+        this.set('launching', false);
+        this.get('windowManager').launch(str, mode);
       }
     }
   },
@@ -83,28 +67,14 @@ export default E.Component.extend(KeyboardShortcuts, Liquid, {
       this.showVolume();
     },
 
-    'shift+esc': function() {
-      this.set('newWindow', true);
-      this.get('keyboardShortcuts.esc').call(this);
-    },
-
-    'esc+tab': function() {
-      this.setProperties({newWindow: true, newSplit: true});
-      this.get('keyboardShortcuts.esc').call(this);
-    },
-
     esc: function() {
       if (this.get('windowManager.isEmpty')) {return;}
-      this.toggleProperty('launching');
-      if (this.get('launching')) {
-        let url = this.get('windowManager.selected.url');
-        this.setProperties({
-          initialUrl: this.get('newWindow') ? '' : url,
-          showStatus: false
-        });
-      } else {
-        this.setProperties({newWindow: false, newSplit: false});
+      let properties = {launching: !this.get('launching')};
+      if (properties.launching) {
+        properties.initialUrl = this.get('windowManager.selected.uri');
+        properties.showStatus = false;
       }
+      this.setProperties(properties);
     },
 
     'meta+ins': function() {
@@ -113,6 +83,7 @@ export default E.Component.extend(KeyboardShortcuts, Liquid, {
     },
 
     'shift+space': function() {
+      if (this.get('windowManager.isEmpty')) {return;}
       this.get('windowManager').toggleView();
     }
   }

@@ -1,103 +1,120 @@
 import E from 'ember';
 
-var Browser = E.Object.extend({type: 'web-view'});
+// Nodes in the tree.  Called Viewport instead of Window because javascript.
+var Viewport = E.Object.extend({
 
-var Split = E.Object.extend({
-  type: 'split-screen',
-  title: 'Split',
-  children: [],
-  setDirection: E.on('init', function() {
-    if (this.get('direction')) {return;}
-    let tabbed = this.get('parent.direction') === 'tabbed';
-    this.set('direction', tabbed ? 'horizontal' : 'tabbed');
-  })
+  // The parent window of this one.
+  parent: null,
+
+  // True when this window is selected.
+  selected: false
+
 });
 
-export default E.Service.extend({
-  windows: Split.create(),
-  isEmpty: E.computed.empty('windows.children'),
-  selected: null,
+// Browsers load web pages.
+var Browser = Viewport.extend({
 
-  selectedIndex: E.computed('selected.parent.[]', 'selected', function() {
-    if (!this.get('selected.parent')) {return -1;}
-    return this.get('selected.parent.children').indexOf(this.get('selected'));
+  // Use the web-view component.
+  type: 'web-view'
+
+});
+
+// Splits are windows that have children and are never leaves of the tree.
+var Split = Viewport.extend({
+
+  // Use the split-screen component.
+  type: 'split-screen',
+
+  // A boring window title.  TODO make this more useful.
+  title: 'Split',
+
+  // The set of children of this split.
+  children: [],
+
+  // True if there are no children.
+  isEmpty: E.computed.empty('children'),
+
+  // The currently selected child, if any is selected.
+  selectedChild: E.computed('children.@each.selected', function() {
+    return this.get('children').filterBy('selected').get('firstObject');
   }),
 
-  toggleSelectState(win, selected) {
-    let cursor = win;
-    if (cursor) {cursor.set('selectedLeaf', selected);}
-    while (cursor) {
-      cursor.set('selected', selected);
-      cursor = cursor.get('parent');
-    }
-  },
-
-  select(win) {
-    let selected = this.get('selected');
-    if (win === selected) {return;}
-    this.toggleSelectState(selected, false);
-    this.toggleSelectState(win, true);
-    this.set('selected', win || null);
-  },
-
-  createSplit() {
-    if (this.get('isEmpty')) {return;}
-    let children = this.get('selected.parent.children');
-    let index = this.get('selectedIndex');
-    children.removeObject(this.get('selected'));
-    let split = Split.create({
-      parent: this.get('selected.parent'),
-      children: [this.get('selected')]
-    });
-    children.insertAt(index, split);
-    this.get('selected').set('parent', split);
-  },
-
-  toUrl(str) {
-    return str.startsWith('http') ? str : `http://${str}`;
-  },
-
-  createWindow(str) {
-    let parent = this.get('selected.parent') || this.get('windows');
-    let win = Browser.create({url: this.toUrl(str), parent: parent});
-    parent.get('children').insertAt(this.get('selectedIndex') + 1, win);
-    this.select(win);
-  },
-
-  launch(newWindow, newSplit, str) {
-    if (newWindow || this.get('selected') === null) {
-      if (newSplit) {this.createSplit();}
-      this.createWindow(str);
+  // Insert a window into this split.  Does so by splitting the selected window
+  // in the given mode if this split is not already in that mode.
+  //
+  // - win: The new window to insert
+  // - mode: The Split mode to open the new window in
+  insert(win, mode) {
+    let selected = this.get('selectedChild'),
+        index    = this.get('children').indexOf(selected);
+    if (this.get('mode') !== mode) {
+      this.get('children').removeObject(selected);
+      win = Split.create({mode: mode, children: [selected, win]});
+      win.get('children').setEach('parent', win);
     } else {
-      this.get('selected').set('url', this.toUrl(str));
+      index++;
     }
-  },
-
-  close() {
-    let index = this.get('selectedIndex');
-    let split = this.get('selected.parent');
-    if (split.get('children.length') - 1 === this.get('selectedIndex')) {
-      index--;
-    }
-    split.get('children').removeObject(this.get('selected'));
-    let newSelected = split.get('children').objectAt(index);
-    if (split.get('children.length') === 1 && split.get('parent')) {
-      index = split.get('parent.children').indexOf(split);
-      split.get('parent.children').removeObject(split);
-      split.get('parent.children').insertAt(index, newSelected);
-      newSelected.set('parent', split.get('parent'));
-    }
-    this.select(newSelected);
-  },
-
-  toggleView() {
-    if (this.get('selected.parent') === undefined) {return;}
-    let direction;
-    switch (this.get('selected.parent.direction')) {
-      case 'tabbed':     direction = 'horizontal'; break;
-      case 'horizontal': direction = 'vertical';   break;
-      case 'vertical':   direction = 'tabbed';     break;
-    }
-    this.get('selected.parent').set('direction', direction);
+    win.set('parent', this);
+    this.get('children').insertAt(index, win);
   }
+
+});
+
+// This service contains a window manager tree.  Window types are defined above.
+// Split windows are branches in the tree, all other windows are leaves.
+export default E.Service.extend({
+
+  // The currently selected window.
+  selected: null,
+
+  // The root window.
+  root: Split.create({mode: 'tabbed'}),
+  activeSplit: E.computed.or('selected.parent', 'root'),
+
+  // True if there are no windows.
+  isEmpty: E.computed.alias('root.isEmpty'),
+
+  // Select the given window.
+  select(window) {
+    if (this.get('selected')) {
+      this.get('selected').setProperties({selected: false});
+    }
+    window.set('selected', true);
+    this.set('selected', window);
+  },
+
+  // Launch the given string in the given mode.  If the mode is 'go', then the
+  // current window is replaced by launching the given string.  If the mode is
+  // 'tabbed', 'horizontal', or 'vertical', then we check to see if the selected
+  // window's parent split is already split in that mode.  If it is, we add
+  // another sibling window.  If it isn't, we split the selected window with the
+  // new window in the given mode.  Arguments:
+  //
+  // - uri: The uri that should be launched
+  // - mode: The mode to split with, or 'go' to change the uri of the selected
+  //     window
+  launch(uri, mode) {
+    if (mode === 'go' && !this.get('isEmpty')) {
+      this.get('selected').set('uri', uri);
+    } else {
+      let win = Browser.create({uri: uri});
+      this.get('activeSplit').insert(win, mode);
+      this.select(win);
+    }
+  },
+
+  // Toggles the view of the selected window's parent from tabbed to horizontal,
+  // horizontal to vertical, or vertical to tabbed.
+  toggleView() {
+    let mode = this.get('selected.parent.mode');
+    switch (mode) {
+      case 'tabbed':     mode = 'horizontal'; break;
+      case 'horizontal': mode = 'vertical';   break;
+      case 'vertical':   mode = 'tabbed';     break;
+    }
+    if (mode) {
+      this.get('selected.parent').set('mode', mode);
+    }
+  }
+
 });

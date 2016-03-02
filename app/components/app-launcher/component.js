@@ -4,6 +4,7 @@ export default E.Component.extend({
   days: 'Monday Tuesday Wednesday Thursday Friday Saturday Sunday'.w(),
   months: "January February Mark April May June July August September October\
            November December".w(),
+  mode: 'tabbed',
 
   open: E.computed('value', function() {
     return !E.isEmpty(this.get('value'));
@@ -31,8 +32,21 @@ export default E.Component.extend({
 
   actions: {
 
+    toggleMode() {
+      let mode = this.get('mode');
+      switch (mode) {
+        case 'go': mode = 'tabbed'; break;
+        case 'tabbed': mode = 'horizontal'; break;
+        case 'horizontal': mode = 'vertical'; break;
+        case 'vertical': mode = 'go'; break;
+      }
+      this.set('mode', mode);
+    },
+
     enter() {
-      this.attrs['enter'](this.get('value'));
+      let url = this.get('value');
+      url = url.startsWith('http') ? url : `http://${url}`;
+      this.attrs['enter'](url, this.get('mode'));
     }
   }
 });
