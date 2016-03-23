@@ -6,27 +6,13 @@ export default E.Component.extend({
 
   setupWebview: E.on('didInsertElement', function() {
     let webview = this.$('webview')[0];
-    let code = "window.addEventListener('message', function(e) {" +
-               "  if (e.data.command == 'getTitle') {" +
-               "    var message = {" +
-               "      title: document.title," +
-               `      id: '${this.get('elementId')}'` +
-               "    };" +
-               "    e.source.postMessage(message, e.origin);" +
-               "  }" +
-               "});";
-    webview.addEventListener('loadstart', () => {
+    webview.addEventListener('did-start-loading', () => {
       this.get('window').set('title', 'Loading...');
     });
-    webview.addEventListener('loadstop', () => {
-      this.get('window').set('title', '');
+    webview.addEventListener('did-stop-loading', () => {
+      this.get('window').set('title', webview.getTitle());
     });
-    webview.addEventListener('contentload', () => {
-      this.get('window').set('uri', webview.src);
-      webview.executeScript({code: code});
-      webview.contentWindow.postMessage({command: 'getTitle'}, '*');
-    });
-    webview.addEventListener('newwindow', (event) => {
+    webview.addEventListener('new-window', (event) => {
       this.get('windowManager').launch(event.targetUrl, 'tabbed');
     });
     this.set('message', (e) => {
