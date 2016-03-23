@@ -32,20 +32,6 @@
     bottom 0
     z-index -1
     transition left $speed, right ($speed / 1.5)
-  & > .tab
-    flex-grow 1
-    flex-basis 0
-    padding 5px
-    text-overflow ellipsis
-    overflow hidden
-    white-space nowrap
-    transition color $speed
-    &:not(:first-child)
-      border-left $border-size solid $foreground
-    &.selected
-      color $background
-    &:not(.selected)
-      cursor pointer
 
 & > .windows
   display flex

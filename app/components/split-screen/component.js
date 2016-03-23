@@ -1,7 +1,6 @@
 import E from 'ember';
 
 export default E.Component.extend({
-  windowManager: E.inject.service(),
   classNameBindings: 'window.selected window.lastSelected window.mode'.w(),
   windowsLeft: new E.Handlebars.SafeString('left: 0;'),
   selectorPosition: new E.Handlebars.SafeString('left: 0; right: 50%;'),
@@ -26,11 +25,5 @@ export default E.Component.extend({
         tabPosition = `left: ${left}%; right: ${right}%;`;
     tabPosition += ` min-width: ${min}%; max-width: ${max}%;`;
     this.set('selectorPosition', new E.Handlebars.SafeString(tabPosition));
-  }),
-
-  actions: {
-    select(win) {
-      this.get('windowManager').select(win);
-    }
-  }
+  })
 });

@@ -7,7 +7,12 @@ var Viewport = E.Object.extend({
   parent: null,
 
   // True when this window is selected.
-  selected: false
+  selected: false,
+
+  // Call this to close a window.
+  close() {
+    this.get('parent.children').removeObject(this);
+  }
 
 });
 
@@ -73,6 +78,19 @@ export default E.Service.extend({
 
   // True if there are no windows.
   isEmpty: E.computed.alias('root.isEmpty'),
+
+  // Close the given window.
+  close(window) {
+    if (window.get('selected')) {
+      let children = window.get('parent.children'),
+          index = children.indexOf(window) + 1;
+      if (index >= children.length) {
+        index -= 2;
+      }
+      this.select(children.objectAt(index));
+    }
+    window.close();
+  },
 
   // Select the given window.
   select(window) {

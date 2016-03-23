@@ -13,13 +13,8 @@ export default E.Component.extend({
       this.get('window').set('title', webview.getTitle());
     });
     webview.addEventListener('new-window', (event) => {
-      this.get('windowManager').launch(event.targetUrl, 'tabbed');
+      this.get('windowManager').launch(event.url, 'tabbed');
     });
-    this.set('message', (e) => {
-      if (e.data.id !== this.get('elementId')) {return;}
-      this.get('window').set('title', e.data.title);
-    });
-    window.addEventListener('message', this.get('message'));
   }),
 
   teardownEvents: E.on('willDestroy', function() {

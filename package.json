@@ -40,7 +40,6 @@
     "ember-cli-stylus": "1.0.5",
     "ember-cli-uglify": "^1.2.0",
     "ember-component-css": "https://github.com/webark/ember-component-css.git#basic-class-name-preprocessing",
-    "ember-data": "^2.4.0",
     "ember-disable-proxy-controllers": "^1.0.1",
     "ember-electron": "1.1.1",
     "ember-export-application-global": "^1.0.4",

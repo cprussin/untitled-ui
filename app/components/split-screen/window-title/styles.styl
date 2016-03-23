@@ -1,0 +1,34 @@
+&
+  flex-grow 1
+  flex-basis 0
+  padding 5px
+  text-overflow ellipsis
+  overflow hidden
+  white-space nowrap
+  transition color $speed
+  position relative
+
+&:not(:first-child)
+  border-left $border-size solid $foreground
+
+&.selected
+  color $background
+  & > .close
+    color $background
+    &:hover
+      color lighten($background, 20%);
+
+&:not(.selected)
+  cursor pointer
+
+& > .close
+  position absolute
+  right 5px
+  top 5px
+  color $foreground
+  transition color $speed
+  cursor pointer
+  &:before
+    icon 'close'
+  &:hover
+    color darken($foreground, 20%);
