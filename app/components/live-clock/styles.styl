@@ -1,20 +1,22 @@
-&, .liquid-container, .liquid-child
+&, & > .liquid-container, & > .liquid-container > .liquid-child
   height 100%
   display flex
   align-items center
   justify-content center
 
-.liquid-child
-  width 2.5ch
+& > .year
+  &, & > .liquid-child
+    width 4ch
 
-.year > .liquid-child
-  width 4.5ch
+& > .month, & > .day, & > .hours, & > .minutes, & > .seconds
+  &, & > .liquid-child
+    width 2ch
 
-.date-separator:before
+& > .date-separator:before
   content '-'
 
-.datetime-separator:before
+& > .datetime-separator:before
   content '\00a0'
 
-.time-separator:before
+& > .time-separator:before
   content ':'
