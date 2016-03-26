@@ -1,10 +1,15 @@
 import E from 'ember';
+import {EKMixin, EKOnInsertMixin, keyUp} from 'ember-keyboard';
 
-export default E.Component.extend({
+export default E.Component.extend(EKMixin, EKOnInsertMixin, {
+  windowManager: E.inject.service(),
+
   days: 'Monday Tuesday Wednesday Thursday Friday Saturday Sunday'.w(),
   months: "January February Mark April May June July August September October\
            November December".w(),
   mode: 'tabbed',
+
+  showBackground: E.computed.alias('windowManager.isEmpty'),
 
   open: E.computed('value', function() {
     return !E.isEmpty(this.get('value'));
@@ -30,7 +35,35 @@ export default E.Component.extend({
     E.run.later(this, this.setTime, 86400000 - millis);
   }),
 
+  go(url) {
+    if (url === 'http://') {
+      this.get('windowManager.selected').close();
+      this.doClose();
+    } else {
+      this.get('windowManager').launch(url, this.get('mode'));
+      this.get('toggle')();
+    }
+  },
+
+  doClose: E.on(keyUp('Escape'), function() {
+    if (!this.get('windowManager.isEmpty')) {
+      this.get('toggle')();
+    }
+  }),
+
   actions: {
+
+    openMessages() {
+      this.go('http://gmail.com');
+    },
+
+    openCalendar() {
+      this.go('http://calendar.google.com');
+    },
+
+    openNotes() {
+      this.go('http://wunderlist.com');
+    },
 
     toggleMode() {
       let mode = this.get('mode');
@@ -43,10 +76,14 @@ export default E.Component.extend({
       this.set('mode', mode);
     },
 
-    enter() {
+    go() {
       let url = this.get('value');
       url = url.startsWith('http') ? url : `http://${url}`;
-      this.attrs['enter'](url, this.get('mode'));
+      this.go(url);
+    },
+
+    close() {
+      this.doClose();
     }
   }
 });

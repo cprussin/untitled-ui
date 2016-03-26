@@ -1,12 +1,15 @@
 import E from 'ember';
-import KeyboardShortcuts from 'ember-keyboard-shortcuts/mixins/component';
+import {EKMixin, EKOnInsertMixin, keyUp} from 'ember-keyboard';
 import Liquid from 'ui/mixins/liquid';
 
-export default E.Component.extend(KeyboardShortcuts, Liquid, {
+export default E.Component.extend(Liquid, EKMixin, EKOnInsertMixin, {
   audio: E.inject.service(),
   windowManager: E.inject.service(),
-  initialUrl: E.computed.oneWay('url'),
   launching: true,
+
+  hideVolume() {
+    this.set('volumeVisible', false);
+  },
 
   setupTransitions: E.observer('liquid', function() {
     let liquid = this.get('liquid');
@@ -24,67 +27,44 @@ export default E.Component.extend(KeyboardShortcuts, Liquid, {
     );
   }).on('init'),
 
+  watchVolumeKeys: E.on('didInsertElement', function() {
+    let renderer = require('electron').ipcRenderer;
+    renderer.on('volume', (event, message) => {
+      switch(message) {
+        case 'up':   this.get('audio').increase(); break;
+        case 'down': this.get('audio').decrease(); break;
+        case 'mute': this.get('audio').toggle();   break;
+      }
+      this.set('volumeVisible', true);
+      E.run.debounce(this, this.hideVolume, 1000);
+    });
+  }),
+
   volumeOverlayClasses: E.computed('audio.mute', function() {
     var classes = ['volume-overlay'];
     if (this.get('audio.mute')) {classes.push('mute');}
     return classes.join(' ');
   }),
 
-  hideVolume() {
-    this.set('volumeVisible', false);
-  },
+  launch: E.on(keyUp('meta+n'), function() {
+    this.set('launching', true);
+  }),
 
-  showVolume() {
-    this.set('volumeVisible', true);
-    E.run.debounce(this, this.hideVolume, 1000);
-  },
+  toggleStatus: E.on(keyUp('meta+Insert'), function() {
+    if (!this.get('launching')) {
+      this.toggleProperty('showStatus');
+    }
+  }),
 
   actions: {
-    go: function(str, mode) {
-      if (str === 'http://') {
-        this.get('windowManager.selected').close();
-        this.set('launching', this.get('windowManager.isEmpty'));
-      } else {
-        this.set('launching', false);
-        this.get('windowManager').launch(str, mode);
-      }
-    }
-  },
-
-  keyboardShortcuts: {
-    'meta+end': function() {
-      this.get('audio').toggle();
-      this.showVolume();
-    },
-
-    'meta+pageup': function() {
-      this.get('audio').increase();
-      this.showVolume();
-    },
-
-    'meta+pagedown': function() {
-      this.get('audio').decrease();
-      this.showVolume();
-    },
-
-    esc: function() {
-      if (this.get('windowManager.isEmpty')) {return;}
-      let properties = {launching: !this.get('launching')};
-      if (properties.launching) {
-        properties.initialUrl = this.get('windowManager.selected.uri');
-        properties.showStatus = false;
-      }
-      this.setProperties(properties);
-    },
-
-    'meta+ins': function() {
-      if (this.get('launching')) {return;}
+    toggleLauncher() {
+      this.toggleProperty('launching');
       this.toggleProperty('showStatus');
-    },
-
-    'shift+space': function() {
-      if (this.get('windowManager.isEmpty')) {return;}
-      this.get('windowManager').toggleView();
     }
   }
+
+  //'shift+space': function() {
+    //if (this.get('windowManager.isEmpty')) {return;}
+    //this.get('windowManager').toggleView();
+  //}
 });

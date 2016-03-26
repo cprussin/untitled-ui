@@ -4,3 +4,7 @@ liquid-bind .networks network.networks as |networks|: each networks as |net|
     if (eq net.type 'wireless'): .ssid = net.ssid
     .ip = net.ip
 .battery 26.66
+.menu [
+  click='clickMenu'
+  class=windowManager.isEmpty:invisible
+  class=hideBackground:close ]

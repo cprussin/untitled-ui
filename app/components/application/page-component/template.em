@@ -1,8 +1,15 @@
+/ The volume overlay
 liquid-if volumeVisible class=volumeOverlayClasses: = audio.volume
-liquid-if .status showStatus: status-bar .status-bar
-liquid-if .launcher launching: app-launcher [
-  class='app-launcher'
-  showBackground=windowManager.isEmpty
-  value=initialUrl
-  enter=(action 'go') ]
+
+/ The status bar
+status-bar [
+  class=status-bar
+  hideBackground=launching
+  clickMenu=(action 'toggleLauncher') ]
+
+/ The app launcher
+liquid-if .launcher launching
+  app-launcher .app-launcher toggle=(action 'toggleLauncher')
+
+/ The window manager
 component .window-manager windowManager.root.type window=windowManager.root

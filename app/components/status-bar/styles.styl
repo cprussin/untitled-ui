@@ -1,15 +1,25 @@
 &
   position absolute
-  top 0
   right 70px
   border-radius 10px
   border-top-left-radius 0
   border-top-right-radius 0
-  background rgba(0, 0, 0, 0.5)
   display flex
   padding 10px 20px
   color white
   font-weight bold
+  background transparent
+  margin-top 0
+  transition background $speed, margin-top $speed
+
+&:not(.hide-background)
+  background rgba(0, 0, 0, 0.5)
+
+&.hidden
+  margin-top -2.4em
+
+&:not(.hidden)
+  top 0
 
 & > div
 
@@ -54,3 +64,16 @@
 
 .battery:after, .volume:after
   content '%'
+
+& > .menu
+  transition opacity $speed, transform $speed
+  width 2ch
+  text-align center
+  &.invisible
+    opacity 0
+  &:not(.invisible)
+    cursor pointer
+  &:before
+    icon 'arrow-down'
+  &.close
+    transform rotate(-180deg)

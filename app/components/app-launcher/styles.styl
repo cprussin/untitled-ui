@@ -6,7 +6,9 @@
   justify-content center
   background rgba(0, 0, 0, .80)
 
-.background, .background > .liquid-child, .background > .liquid-child > img
+& > .background,
+& > .background > .liquid-child,
+& > .background > .liquid-child > img
   position absolute
   top 0
   bottom 0
@@ -14,24 +16,25 @@
   right 0
   z-index -2
 
-.background > .liquid-child
+& > .background > .liquid-child
   background url('background.jpg')
   background-size cover
   background-position center
 
-.status
+& > .status
   background none
 
-.date
+& > .date
   color white
   width 100%
   font-size 1.4em
   text-align center
-  margin-top 175px
+  margin-top 115px
   margin-bottom 20px
   font-weight bold
+  flex-shrink 0
 
-.clock
+& > .clock
   color white
   font-weight bold
   font-size 1.7em
@@ -40,8 +43,26 @@
   padding 0 20px
   background rgba(0, 0, 0, 0.5)
   border-radius 3px
+  flex-shrink 0
 
-input
+& > .mode
+  cursor pointer
+  font-size 2em
+  position absolute
+  margin-top 1em
+  width 100%
+  text-align center
+  padding 10px
+  &.tabbed:before
+    icon 'page'
+  &.vertical:before
+    icon 'table'
+  &.horizontal:before
+    icon 'columns'
+  &.go:before
+    icon 'arrow-right'
+
+& > input
   background transparent
   outline none
   border none
@@ -50,7 +71,7 @@ input
   line-height 2em
   font-size 2em
   color white
-  padding 3em 20px 5px 20px
+  padding 2em 20px 5px 20px
   text-align center
   transition color .5s, border-color .5s, width .5s
 
@@ -61,5 +82,22 @@ input
   &:focus, &.open
     width 60%
 
-.spacer
+& > .spacer
   flex-grow 1
+
+& > .shortcuts
+  display flex
+  flex-flow row nowrap
+  width 85%;
+  justify-content space-around;
+  padding 10px
+  margin-bottom 10%
+  & > .messages, & > .calendar, & > .notes
+    cursor pointer
+    font-size 3em
+    &.messages:before
+      icon 'quote'
+    &.calendar:before
+      icon 'calendar'
+    &.notes:before
+      icon 'pad'

@@ -1,7 +1,7 @@
 import E from 'ember';
+import Window from 'ui/mixins/window';
 
-export default E.Component.extend({
-  windowManager: E.inject.service(),
+export default E.Component.extend(Window, {
   classNameBindings: 'window.selected window.lastSelected'.w(),
 
   setupWebview: E.on('didInsertElement', function() {
@@ -13,16 +13,7 @@ export default E.Component.extend({
       this.get('window').set('title', webview.getTitle());
     });
     webview.addEventListener('new-window', (event) => {
-      this.get('windowManager').launch(event.url, 'tabbed');
+      this.get('windowManager').launch(event.url, 'tabbed', {select: false});
     });
-  }),
-
-  teardownEvents: E.on('willDestroy', function() {
-    window.removeEventListener('message', this.get('message'));
-  }),
-
-  mouseMove() {
-    if (this.get('window.parent.mode') === 'tabbed') {return;}
-    this.get('windowManager').select(this.get('window'));
-  }
+  })
 });

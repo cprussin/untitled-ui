@@ -3,6 +3,7 @@
     "chrome",
     "document",
     "window",
+    "require",
     "-Promise"
   ],
   "browser": true,

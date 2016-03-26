@@ -1,7 +1,11 @@
 liquid-if .background showBackground use='fade'
-status-bar .status
-.mode click='toggleMode' = mode
 liquid-bind .date date use='toLeft'
 live-clock .clock date=false
-= input class=open value=value enter='enter'
+unless windowManager.isEmpty: .mode click='toggleMode' class=mode
+= input class=open value=value enter='go' escape-press='close'
+.spacer
+.shortcuts
+  .messages click='openMessages'
+  .calendar click='openCalendar'
+  .notes click='openNotes'
 .spacer

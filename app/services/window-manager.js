@@ -111,13 +111,16 @@ export default E.Service.extend({
   // - uri: The uri that should be launched
   // - mode: The mode to split with, or 'go' to change the uri of the selected
   //     window
-  launch(uri, mode) {
-    if (mode === 'go' && !this.get('isEmpty')) {
+  launch(uri, mode, options = {}) {
+    let isEmpty = this.get('isEmpty');
+    if (mode === 'go' && !isEmpty) {
       this.get('selected').set('uri', uri);
     } else {
       let win = Browser.create({uri: uri});
-      this.get('activeSplit').insert(win, mode);
-      this.select(win);
+      this.get('activeSplit').insert(win, isEmpty ? 'tabbed' : mode);
+      if (options.select !== false) {
+        this.select(win);
+      }
     }
   },
 
