@@ -1,14 +1,30 @@
 // Define the icon codes.
 $icons = {
-  battery:  '\f242'
-  ethernet: '\f108'
-  mute:     '\f026'
-  volume:   '\f028'
-  wifi:     '\f1eb'
-  close:    '\f00d'
+  arrow-down:  '\f063'
+  arrow-right: '\f061'
+  arrow-up:    '\f062'
+  bars:        '\f0c9'
+  battery:     '\f242'
+  calendar:    '\f073'
+  columns:     '\f0db'
+  close:       '\f00d'
+  ethernet:    '\f108'
+  mute:        '\f026'
+  quote:       '\f0e5'
+  list:        '\f03a'
+  pad:         '\f24a'
+  page:        '\f016'
+  table:       '\f0ce'
+  volume:      '\f028'
+  wifi:        '\f1eb'
 }
+
+// The icon font set.
+@font-face
+  font-family Fonts
+  src url(fontawesome.ttf)
 
 // Add this mixin to show an icon.
 icon($icon)
-  font-family FontAwesome
+  font-family Fonts
   content $icons[$icon]
