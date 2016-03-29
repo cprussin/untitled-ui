@@ -2,33 +2,44 @@
   flex-grow 1
   flex-basis 0
   padding 5px
-  text-overflow ellipsis
-  overflow hidden
-  white-space nowrap
-  transition color $speed
-  position relative
+  display flex
+  flex-flow row nowrap
 
 &:not(:first-child)
-  border-left $border-size solid $foreground
-
-&.selected
-  color $background
-  & > .close
-    color $background
-    &:hover
-      color lighten($background, 20%);
+  border-left $border-size solid $active-foreground
 
 &:not(.selected)
   cursor pointer
+  color $inactive-foreground
 
-& > .close
-  position absolute
-  right 5px
-  top 5px
-  color $foreground
+&.selected
+  color lighten($inactive-foreground, 40%)
+
+& > .back, & > .forward, & > .refresh, & > .title, & > .close
+  margin 0 5px
   transition color $speed
+
+& > .back, & > .forward, & > .refresh, & > .close
   cursor pointer
-  &:before
+  &.back:before
+    icon 'arrow-left'
+  &.forward:before
+    icon 'arrow-right'
+  &.refresh:before
+    icon 'refresh'
+  &.close:before
     icon 'close'
-  &:hover
-    color darken($foreground, 20%);
+
+& > .back:hover, & > .forward:hover, & > .refresh:hover
+  color $inactive-foreground;
+
+& > .close:hover
+  color $warning, 40%;
+
+& > .title
+  flex-grow 1
+  flex-basis 0
+  width 0
+  text-overflow ellipsis
+  overflow hidden
+  white-space nowrap

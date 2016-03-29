@@ -11,6 +11,12 @@ export default E.Component.extend(Liquid, EKMixin, EKOnInsertMixin, {
     this.set('volumeVisible', false);
   },
 
+  showLauncherOnEmpty: E.observer('windowManager.isEmpty', function() {
+    if (this.get('windowManager.isEmpty')) {
+      this.set('launching', true);
+    }
+  }),
+
   setupTransitions: E.observer('liquid', function() {
     let liquid = this.get('liquid');
     'launcher status'.w().forEach((className) => {
@@ -50,21 +56,14 @@ export default E.Component.extend(Liquid, EKMixin, EKOnInsertMixin, {
     this.set('launching', true);
   }),
 
-  toggleStatus: E.on(keyUp('meta+Insert'), function() {
-    if (!this.get('launching')) {
-      this.toggleProperty('showStatus');
-    }
+  toggleMode: E.on(keyUp('meta+ '), function() {
+    if (this.get('windowManager.isEmpty')) {return;}
+    this.get('windowManager').toggleView();
   }),
 
   actions: {
     toggleLauncher() {
       this.toggleProperty('launching');
-      this.toggleProperty('showStatus');
     }
   }
-
-  //'shift+space': function() {
-    //if (this.get('windowManager.isEmpty')) {return;}
-    //this.get('windowManager').toggleView();
-  //}
 });

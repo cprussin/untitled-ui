@@ -2,6 +2,7 @@ import E from 'ember';
 import {EKMixin, EKOnInsertMixin, keyUp} from 'ember-keyboard';
 
 export default E.Component.extend(EKMixin, EKOnInsertMixin, {
+  search: E.inject.service(),
   windowManager: E.inject.service(),
 
   days: 'Monday Tuesday Wednesday Thursday Friday Saturday Sunday'.w(),
@@ -10,6 +11,14 @@ export default E.Component.extend(EKMixin, EKOnInsertMixin, {
   mode: 'tabbed',
 
   showBackground: E.computed.alias('windowManager.isEmpty'),
+
+  updateSearch: E.observer('value', function() {
+    if (!E.isEmpty(this.get('value'))) {
+      this.get('search').search(this.get('value'));
+    } else {
+      this.get('search').clear();
+    }
+  }),
 
   open: E.computed('value', function() {
     return !E.isEmpty(this.get('value'));
@@ -54,7 +63,7 @@ export default E.Component.extend(EKMixin, EKOnInsertMixin, {
   actions: {
 
     openMessages() {
-      this.go('http://gmail.com');
+      this.go('http://inbox.google.com');
     },
 
     openCalendar() {
@@ -76,10 +85,10 @@ export default E.Component.extend(EKMixin, EKOnInsertMixin, {
       this.set('mode', mode);
     },
 
-    go() {
-      let url = this.get('value');
+    go(url = this.get('value')) {
       url = url.startsWith('http') ? url : `http://${url}`;
       this.go(url);
+      this.get('search').clear();
     },
 
     close() {

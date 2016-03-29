@@ -20,7 +20,19 @@ var Viewport = E.Object.extend({
 var Browser = Viewport.extend({
 
   // Use the web-view component.
-  type: 'web-view'
+  type: 'web-view',
+
+  back() {
+    this.get('webview').goBack();
+  },
+
+  forward() {
+    this.get('webview').goForward();
+  },
+
+  reload() {
+    this.get('webview').reload();
+  }
 
 });
 
@@ -87,7 +99,9 @@ export default E.Service.extend({
       if (index >= children.length) {
         index -= 2;
       }
-      this.select(children.objectAt(index));
+      if (index !== -1) {
+        this.select(children.objectAt(index));
+      }
     }
     window.close();
   },

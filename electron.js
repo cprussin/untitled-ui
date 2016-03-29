@@ -13,12 +13,19 @@ let app            = Electron.app;
 let BrowserWindow  = Electron.BrowserWindow;
 let globalShortcut = Electron.globalShortcut;
 
-let home   = `file://${__dirname}/dist/index.html`;
-let config = require('./config/environment.js')('development');
+let home        = `file://${__dirname}/dist/index.html`;
+let environment = 'development';
+let config      = require('./config/environment.js')(environment);
 
 // Set up the environment.
 let connections = [];
 let win         = null;
+
+function debug(message) {
+  if (environment === 'debug') {
+    console.log(message);
+  }
+}
 
 // Set up the app.
 app.on('window-all-closed', () => app.quit());
@@ -39,7 +46,7 @@ app.on('ready', () => {
 let socket = Net.createServer((stream) => {
   stream.on('data', (str) => {
     str = str.toString();
-    console.log('Received (Unix): ' + str);
+    debug('Received (Unix): ' + str);
     if (str === 'update network') {
       for (let connection of connections) {connection.getNetworks();}
     }
@@ -61,7 +68,7 @@ socket.on('error', (e) => {
 
   // If something does respond, then the server is already running, so exit.
   clientSocket.connect({path: '/tmp/app-monitor.sock'}, () => {
-    console.log('Server already running.');
+    debug('Server already running.');
   });
 });
 
@@ -83,7 +90,7 @@ let websocket = Ws.createServer((conn) => {
   // Sends a message to the client.
   conn.send = (message) => {
     let json = JSON.stringify(message);
-    console.log('Sending: ' + json);
+    debug('Sending: ' + json);
     conn.sendText(json);
   };
 
@@ -133,13 +140,59 @@ let websocket = Ws.createServer((conn) => {
     conn.run('pamixer ' + (mute ? ['--mute'] : ['--unmute'])).then(conn.getVolume);
   };
 
+  conn.isURL = (str) => {
+    return new RegExp("^((https|http|ftp|rtsp|mms)?://)"
+        + "?(([0-9a-z_!~*'().&=+$%-]+: )?[0-9a-z_!~*'().&=+$%-]+@)?" //ftp的user@
+        + "(([0-9]{1,3}\.){3}[0-9]{1,3}" // IP形式的URL- 199.194.52.184
+        + "|" // 允许IP和DOMAIN（域名）
+        + "([0-9a-z_!~*'()-]+\.)*" // 域名- www.
+        + "([0-9a-z][0-9a-z-]{0,61})?[0-9a-z]\." // 二级域名
+        + "[a-z]{2,6})" // first level domain- .com or .museum
+        + "(:[0-9]{1,4})?" // 端口- :80
+        + "((/?)|" // a slash isn't required if there is no file name
+        + "(/[0-9a-z_!~*'().;?:@&=+$,%#-]+)+/?)$").test(str);
+  }
+
+  conn.search = (query) => {
+    let urlquery = encodeURIComponent(query);
+    let results = [{
+      type: 'wikipedia',
+      title: `Search Wikipedia for "${query}".`,
+      url: `https://en.wikipedia.org/wiki/Special:Search?search=${urlquery}&go=Go`
+    }, {
+      type: 'google',
+      title: `Search Google for "${query}".`,
+      url: `https://www.google.com?hl=en&q=${urlquery}`
+    }, {
+      type: 'images',
+      title: `Search Google Images for "${query}".`,
+      url: `https://www.google.com/images?hl=en&q=${urlquery}`
+    }, {
+      type: 'maps',
+      title: `Search Google Maps for "${query}".`,
+      url: `https://www.google.com/maps?hl=en&q=${urlquery}`
+    }, {
+      type: 'youtube',
+      title: `Search Youtube for "${query}".`,
+      url: `https://www.youtube.com/results?search_query=${urlquery}`
+    }];
+    if (conn.isURL(query)) {
+      results.unshift({
+        type: 'exec',
+        title: `Go to "${query}".`,
+        url: query.startsWith('http') ? query : `http://${query}`
+      });
+    }
+    conn.send({message: 'search-results', body: results});
+  }
+
   // Send initial set of infos.
   conn.getVolume();
   conn.getNetworks();
 
   // Handle incoming messages.
   conn.on('text', (str) => {
-    console.log('Received (Web): ' + str);
+    debug('Received (Web): ' + str);
     if (str === 'get volume') {
       conn.getVolume();
     } else if (str.startsWith('set volume')) {
@@ -148,6 +201,8 @@ let websocket = Ws.createServer((conn) => {
       conn.setMute(str.split(' ').pop() === 'true');
     } else if (str === 'get networks') {
       conn.getNetworks();
+    } else if (str.startsWith('search')) {
+      conn.search(str.split(' ').splice(1).join(' '));
     }
   });
 
@@ -164,5 +219,5 @@ let websocket = Ws.createServer((conn) => {
 // Handle EADDRINUSE.
 websocket.on('error', (e) => {
   if (e.code !== 'EADDRINUSE') {return;}
-  console.log('Server already running.');
+  debug('Server already running.');
 });

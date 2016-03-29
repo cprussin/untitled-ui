@@ -82,16 +82,30 @@
   &:focus, &.open
     width 60%
 
-& > .spacer
+& > .search
   flex-grow 1
-
-& > .shortcuts
   display flex
-  flex-flow row nowrap
-  width 85%;
-  justify-content space-around;
+  width 85%
   padding 10px
-  margin-bottom 10%
+  margin 10% 0
+  &:not(.empty)
+    flex-flow column nowrap
+  &.empty
+    flex-flow row nowrap
+    justify-content space-around
+    align-items center
+  & > .result
+    height 100px
+    margin 5px
+    cursor pointer
+    background transparent
+    transition background $speed
+    display flex
+    align-items center
+    justify-content center
+    border-radius 15px
+    &:hover
+      background black
   & > .messages, & > .calendar, & > .notes
     cursor pointer
     font-size 3em

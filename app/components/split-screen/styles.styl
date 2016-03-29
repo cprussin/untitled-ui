@@ -19,18 +19,20 @@
     border none
 
 & > .tabs
-  display flex
-  flex-flow row nowrap
-  background $background
-  color $foreground
+  background $inactive-background
   position relative
-  z-index 0
+  & > .liquid-container > .liquid-child
+    display flex
+    flex-flow row nowrap
   & > .selector
-    background $foreground
+    background $active-foreground
+    mix-blend-mode color
+    opacity .5
+    pointer-events none
     position absolute
     top 0
     bottom 0
-    z-index -1
+    z-index 1
     transition left $speed, right ($speed / 1.5)
 
 & > .windows
@@ -40,8 +42,8 @@
   & > .window
     flex-basis 0
     flex-grow 1
-    border $border-size solid $background
+    border $border solid $background
     &.last-selected
-      border-color darken($foreground, 50%)
+      border-color darken($active-foreground, 50%)
     &.selected
-      border-color $foreground
+      border-color $active-foreground

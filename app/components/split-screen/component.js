@@ -1,9 +1,18 @@
 import E from 'ember';
+import Liquid from 'ui/mixins/liquid';
 
-export default E.Component.extend({
+export default E.Component.extend(Liquid, {
   classNameBindings: 'window.selected window.lastSelected window.mode'.w(),
   windowsLeft: new E.Handlebars.SafeString('left: 0;'),
   selectorPosition: new E.Handlebars.SafeString('left: 0; right: 50%;'),
+
+  setupTransitions: E.observer('liquid', function() {
+    let liquid = this.get('liquid');
+    liquid.transition(
+      liquid.hasClass('liquid-tabs'),
+      liquid.use('fade')
+    );
+  }).on('init'),
 
   showTabs: E.computed('window.mode', 'window.children.length', function() {
     let tabbed = this.get('window.mode') === 'tabbed';

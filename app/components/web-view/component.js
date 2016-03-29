@@ -6,6 +6,7 @@ export default E.Component.extend(Window, {
 
   setupWebview: E.on('didInsertElement', function() {
     let webview = this.$('webview')[0];
+    this.get('window').set('webview', webview);
     webview.addEventListener('did-start-loading', () => {
       this.get('window').set('title', 'Loading...');
     });
