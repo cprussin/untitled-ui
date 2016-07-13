@@ -19,6 +19,10 @@ You will need the following things properly installed on your computer.
 * `npm install`
 * `bower install`
 
+### Running
+
+- `./node_modules/ember-cli/bin/ember electron`
+
 ### Running Tests
 
 * `ember test`
